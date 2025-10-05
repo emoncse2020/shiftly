@@ -16,11 +16,11 @@ const ClientLogos = () => {
         </h1>
         <div className="flex animate-scroll whitespace-nowrap">
           {logos.concat(logos).map((logo, index) => (
-            <div key={index} className="mx-6 flex-shrink-0">
+            <div key={index} className="mx-16 flex-shrink-0">
               <img
                 src={logo}
                 alt={`client-${index}`}
-                className="h-16 object-contain"
+                className="h-8 object-contain"
               />
             </div>
           ))}
