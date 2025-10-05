@@ -1,2 +1,42 @@
+@import url("https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tailwindcss";
 @plugin 'daisyui';
+
+.font-urbanist {
+  font-family: "Urbanist", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+/* if i want to show thumbs then */
+/* .carousel .thumbs-wrapper {
+  display: flex;
+  justify-content: center;
+}
+.carousel .thumb {
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0 8px;
+}
+
+.carousel .thumb .img {
+  object-fit: cover;
+} */
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  display: flex;
+  animation: scroll 20s linear infinite;
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
+}

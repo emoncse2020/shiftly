@@ -1,7 +1,13 @@
+import Banner from "../Banner/Banner";
+import ClientLogos from "../ClientLogo/ClientLogos";
+import Services from "../Services/Services";
+
 const Home = () => {
   return (
     <div>
-      <h2>This is home</h2>
+      <Banner />
+      <Services />
+      <ClientLogos />
     </div>
   );
 };
