@@ -1,6 +1,6 @@
 import logo from "../../../assets/logo.png";
 
-const ProFastLogo = () => {
+const ProShiftly = () => {
   return (
     <div className="flex items-end">
       <img className="mb-2" src={logo} alt="" />
@@ -9,4 +9,4 @@ const ProFastLogo = () => {
   );
 };
 
-export default ProFastLogo;
+export default ProShiftly;

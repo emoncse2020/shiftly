@@ -85,11 +85,7 @@ const CustomerSays = () => {
       <div className=" px-4 text-center">
         {/* Top Illustration */}
         <div className="flex justify-center mb-6">
-          <img
-            src={reviewImage}
-            alt="Customer Review"
-            className="w-24 h-auto"
-          />
+          <img src={reviewImage} alt="Customer Review" />
         </div>
 
         {/* Title */}
