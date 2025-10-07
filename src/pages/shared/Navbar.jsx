@@ -1,14 +1,13 @@
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import ProFastLogo from "./ProShiftlyLogo/ProShiftly";
 
 const Navbar = () => {
   const navItems = (
-    <>
-      <NavLink to={"/"} className={"mr-4"}>
-        Home
-      </NavLink>
+    <div className="space-x-2">
+      <NavLink to={"/"}>Home</NavLink>
       <NavLink to={"/coverage"}>Coverage</NavLink>
-    </>
+      <NavLink to={"/sendParcel"}>Send A Parcel</NavLink>
+    </div>
   );
   return (
     <div className="navbar bg-base-100 shadow-sm">
@@ -46,7 +45,9 @@ const Navbar = () => {
         <ul className="menu menu-horizontal px-1">{navItems}</ul>
       </div>
       <div className="navbar-end">
-        <a className="btn">Button</a>
+        <Link to={"/login"} className="btn btn-primary text-black">
+          Log In
+        </Link>
       </div>
     </div>
   );
