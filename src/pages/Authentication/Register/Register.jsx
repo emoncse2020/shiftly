@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import useAuth from "../../../hooks/useAuth";
 import { Link } from "react-router";
+import SocialLogin from "../SocailLogin/SocialLogin";
 
 const Register = () => {
   const { createUser } = useAuth();
@@ -28,7 +29,7 @@ const Register = () => {
           {...register("email", {
             required: true,
           })}
-          className="input min-w-8/12"
+          className="input w-full  md:w-8/12"
           placeholder="Email"
         />
         {errors.email?.type === "required" && (
@@ -44,7 +45,7 @@ const Register = () => {
             required: true,
             minLength: 6,
           })}
-          className="input min-w-8/12"
+          className="input w-full  md:w-8/12"
           placeholder="Password"
         />
         {errors.password?.type === "required" && (
@@ -58,18 +59,24 @@ const Register = () => {
           </p>
         )}
 
-        <button className="btn-primary btn mt-4 w-8/12 text-black">
+        <button className="btn-primary btn mt-4 w-full  md:w-8/12 text-black">
           Register
         </button>
         <p className="mt-1">
           <small>
             Already have and Account{" "}
-            <Link to={"/login"} className="link link-primary">
+            <Link
+              to={"/login"}
+              className="link link-primary px-2 font-semibold"
+            >
               Login
             </Link>
           </small>
         </p>
       </form>
+      <div className="w-full md:w-8/12">
+        <SocialLogin action={"Sign Up"} />
+      </div>
     </div>
   );
 };

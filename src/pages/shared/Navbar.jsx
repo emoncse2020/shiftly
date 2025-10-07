@@ -4,10 +4,10 @@ import ProFastLogo from "./ProShiftlyLogo/ProShiftly";
 const Navbar = () => {
   const navItems = (
     <>
-      <NavLink to={""} className={"mr-4"}>
+      <NavLink to={"/"} className={"mr-4"}>
         Home
       </NavLink>
-      <NavLink to={"/about"}>About Us</NavLink>
+      <NavLink to={"/coverage"}>Coverage</NavLink>
     </>
   );
   return (

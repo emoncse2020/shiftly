@@ -10,10 +10,10 @@ import AuthProvider from "./contexts/AuthContext/AuthProvider.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <AuthProvider>
-      <div className="font-urbanist max-w-7xl mx-auto">
+    <div className="font-urbanist max-w-7xl mx-auto">
+      <AuthProvider>
         <RouterProvider router={router}></RouterProvider>
-      </div>
-    </AuthProvider>
+      </AuthProvider>
+    </div>
   </StrictMode>
 );

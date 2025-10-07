@@ -1,4 +1,6 @@
 import { useForm } from "react-hook-form";
+import { Link } from "react-router";
+import SocialLogin from "../SocailLogin/SocialLogin";
 
 const Login = () => {
   const {
@@ -18,7 +20,7 @@ const Login = () => {
           {...register("email", {
             required: true,
           })}
-          className="input"
+          className="input w-full  md:w-8/12 "
           placeholder="Email"
         />
         {errors.email?.type === "required" && (
@@ -32,7 +34,7 @@ const Login = () => {
             required: true,
             minLength: 6,
           })}
-          className="input"
+          className="input w-full  md:w-8/12"
           placeholder="Password"
         />
         {errors.password?.type === "required" && (
@@ -46,8 +48,21 @@ const Login = () => {
           <a className="link link-hover">Forgot password?</a>
         </div>
 
-        <button className="btn btn-neutral mt-4">Login</button>
+        <button className="btn btn-primary text-black mt-4 w-full md:w-8/12">
+          Login
+        </button>
+        <p className="mt-1">
+          <small>
+            Don't have any Account{" "}
+            <Link to={"/register"} className="link link-primary">
+              Register
+            </Link>
+          </small>
+        </p>
       </form>
+      <div className="w-full md:w-8/12">
+        <SocialLogin action={"Sign In"} />
+      </div>
     </div>
   );
 };
