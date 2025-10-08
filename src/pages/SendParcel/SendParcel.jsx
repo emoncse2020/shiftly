@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useLoaderData } from "react-router";
 import Swal from "sweetalert2";
 import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 // === Generate Unique Tracking ID ===
 const generateTrackingId = () => {
@@ -13,6 +14,7 @@ const generateTrackingId = () => {
 
 const SendParcel = () => {
   const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
   const serviceCenters = useLoaderData();
 
   // Extract unique regions
@@ -27,6 +29,7 @@ const SendParcel = () => {
   const {
     register,
     handleSubmit,
+    reset,
     watch,
     setValue,
     formState: { errors },
@@ -90,7 +93,6 @@ const SendParcel = () => {
       tracking_id: generateTrackingId(),
       cost: total,
       created_by: user?.email || "unknown@system.com",
-      senderEmail: user?.email || "unknown@system.com",
       payment_status: "unpaid",
       delivery_status: "not_collected",
       created_at: new Date().toISOString(),
@@ -106,7 +108,7 @@ const SendParcel = () => {
       ],
     };
 
-    console.log("📦 Parcel Data to Save:", parcelData);
+    // console.log("📦 Parcel Data to Save:", parcelData);
 
     // === SweetAlert Confirmation ===
     Swal.fire({
@@ -162,17 +164,26 @@ const SendParcel = () => {
         // })
         // .then(res => res.json())
         // .then(() => {
-        Swal.fire({
-          icon: "success",
-          title: "Booking Confirmed",
-          text: `Tracking ID: ${parcelData.tracking_id}`,
-          confirmButtonText: "Done",
-          confirmButtonColor: "#16a34a",
-          width: "320px",
-          customClass: {
-            popup: "rounded-xl shadow border border-gray-100",
-          },
+        axiosSecure.post("/parcels", parcelData).then((res) => {
+          // Todl :redirect to the payment page
+          //   console.log(res.data);
+          if (res.data.insertedId) {
+            Swal.fire({
+              icon: "success",
+              title: "Booking Confirmed",
+              text: `Tracking ID: ${parcelData.tracking_id}`,
+              confirmButtonText: "Done",
+              confirmButtonColor: "#16a34a",
+              width: "320px",
+              customClass: {
+                popup: "rounded-xl shadow border border-gray-100",
+              },
+            }).then(() => {
+              reset({ parcelType: "Document" });
+            });
+          }
         });
+
         // });
       }
     });

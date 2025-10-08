@@ -1,12 +1,31 @@
 import { Link, NavLink } from "react-router";
 import ProFastLogo from "./ProShiftlyLogo/ProShiftly";
+import useAuth from "../../hooks/useAuth";
 
 const Navbar = () => {
+  const { user, logOut } = useAuth();
+  const handleLogOut = () => {
+    logOut();
+  };
   const navItems = (
-    <div className="space-x-2">
-      <NavLink to={"/"}>Home</NavLink>
-      <NavLink to={"/coverage"}>Coverage</NavLink>
-      <NavLink to={"/sendParcel"}>Send A Parcel</NavLink>
+    <div className="space-x-2 flex">
+      <li>
+        <NavLink to={"/"}>Home</NavLink>
+      </li>
+      <li>
+        <NavLink to={"/coverage"}>Coverage</NavLink>
+      </li>
+      <li>
+        <NavLink to={"/sendParcel"}>Send A Parcel</NavLink>
+      </li>
+
+      {user && (
+        <>
+          <li>
+            <NavLink to={"/dashboard"}>Dashboard</NavLink>
+          </li>
+        </>
+      )}
     </div>
   );
   return (
@@ -45,9 +64,15 @@ const Navbar = () => {
         <ul className="menu menu-horizontal px-1">{navItems}</ul>
       </div>
       <div className="navbar-end">
-        <Link to={"/login"} className="btn btn-primary text-black">
-          Log In
-        </Link>
+        {user ? (
+          <button className="btn btn-primary" onClick={handleLogOut}>
+            Log Out
+          </button>
+        ) : (
+          <Link to={"/login"} className="btn btn-primary text-black">
+            Log In
+          </Link>
+        )}
       </div>
     </div>
   );

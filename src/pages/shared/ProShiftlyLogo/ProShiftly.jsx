@@ -3,7 +3,7 @@ import logo from "../../../assets/logo.png";
 
 const ProShiftly = () => {
   return (
-    <Link to={""}>
+    <Link to={"/"}>
       {" "}
       <div className="flex items-end">
         <img className="mb-2" src={logo} alt="" />
