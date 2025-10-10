@@ -7,6 +7,7 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
+
 import { AuthContext } from "./AuthContext";
 import { auth } from "../../firebase/firebase.init";
 import { useEffect, useState } from "react";
