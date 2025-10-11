@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { Eye, CheckCircle, XCircle } from "lucide-react";
-import useAxiosSecure from "../../hooks/useAxiosSecure";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
 
 const PendingRiders = () => {
   const axiosSecure = useAxiosSecure();
@@ -49,6 +49,7 @@ const PendingRiders = () => {
         <table className="min-w-full border border-gray-200 text-sm">
           <thead className="bg-gray-100">
             <tr>
+              <th className="p-3 text-left">SL:</th>
               <th className="p-3 text-left">Full Name</th>
               <th className="p-3 text-left">Email</th>
               <th className="p-3 text-left">Contact</th>
@@ -58,8 +59,9 @@ const PendingRiders = () => {
             </tr>
           </thead>
           <tbody>
-            {riders.map((rider) => (
+            {riders.map((rider, idx) => (
               <tr key={rider._id} className="border-b hover:bg-gray-50">
+                <td className="p-3">{idx + 1}</td>
                 <td className="p-3">{rider.fullName}</td>
                 <td className="p-3">{rider.email}</td>
                 <td className="p-3">{rider.contact}</td>

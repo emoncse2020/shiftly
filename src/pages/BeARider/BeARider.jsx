@@ -13,6 +13,7 @@ const BeARider = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
     watch,
   } = useForm();
@@ -68,6 +69,7 @@ const BeARider = () => {
           title: "Application Submitted",
           text: "Your application is pending approval",
         });
+        reset();
       }
     });
   };
