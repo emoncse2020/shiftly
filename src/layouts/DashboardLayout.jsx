@@ -8,10 +8,15 @@ import {
   FiUser,
   FiUsers,
   FiUserPlus,
+  FiUserX,
 } from "react-icons/fi";
+import useUserRole from "../hooks/useUserRole";
 
 const DashboardLayout = () => {
-  const navLinks = [
+  const { role, isLoading } = useUserRole();
+
+  // Base links — available to everyone
+  const commonLinks = [
     { to: "", label: "Home", icon: <FiHome /> },
     { to: "/dashboard/myParcels", label: "My Parcels", icon: <FiPackage /> },
     {
@@ -21,6 +26,10 @@ const DashboardLayout = () => {
     },
     { to: "/dashboard/track", label: "Track a Package", icon: <FiSearch /> },
     { to: "/dashboard/profile", label: "Update Profile", icon: <FiUser /> },
+  ];
+
+  // Admin-only links
+  const adminLinks = [
     {
       to: "/dashboard/activeRiders",
       label: "Active Riders",
@@ -31,11 +40,28 @@ const DashboardLayout = () => {
       label: "Pending Riders",
       icon: <FiUserPlus />,
     },
+    {
+      to: "/dashboard/makeAdmin",
+      label: "Make Admin",
+      icon: <FiUserX />,
+    },
   ];
+
+  // Final nav links
+  const navLinks = [...commonLinks, ...(role === "admin" ? adminLinks : [])];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-lg font-semibold text-gray-600">
+          Loading dashboard...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="drawer lg:drawer-open min-h-screen bg-base-100">
-      {/* Toggle for mobile */}
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
 
       {/* Main content area */}
@@ -78,40 +104,20 @@ const DashboardLayout = () => {
       {/* Sidebar */}
       <div className="drawer-side z-40">
         <label htmlFor="my-drawer-2" className="drawer-overlay"></label>
-
         <ul className="menu p-4 w-72 min-h-full bg-base-200 text-base-content space-y-2">
-          {/* Logo section */}
-          <div className="mb-6 ">
+          {/* Logo */}
+          <div className="mb-6">
             <ProShiftly />
           </div>
 
           {/* Navigation links */}
-          {/* {navLinks.map(({ to, label, icon }) => (
-            <li key={to}>
-              <NavLink
-                to={to}
-                end
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? "bg-primary text-white shadow-md"
-                      : "hover:bg-base-300"
-                  }`
-                }
-              >
-                <span className="text-lg">{icon}</span>
-                <span className="font-medium">{label}</span>
-              </NavLink>
-            </li>
-          ))} */}
-
           {navLinks.map(({ to, label, icon }) => (
             <li key={to}>
               <NavLink
                 to={to}
                 end
                 onClick={() => {
-                  // Close drawer on mobile by unchecking the checkbox
+                  // Close drawer on mobile
                   const drawerCheckbox = document.getElementById("my-drawer-2");
                   if (drawerCheckbox) drawerCheckbox.checked = false;
                 }}

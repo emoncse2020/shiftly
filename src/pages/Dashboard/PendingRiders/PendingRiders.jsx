@@ -23,9 +23,12 @@ const PendingRiders = () => {
   });
 
   // ✅ Handle Approve / Reject
-  const handleStatusChange = async (id, newStatus) => {
+  const handleStatusChange = async (id, newStatus, email) => {
     try {
-      await axiosSecure.patch(`/riders/${id}`, { status: newStatus });
+      await axiosSecure.patch(`/riders/${id}/status`, {
+        status: newStatus,
+        email,
+      });
       toast.success(
         `Rider ${newStatus === "active" ? "approved" : "rejected"} successfully`
       );
@@ -146,14 +149,24 @@ const PendingRiders = () => {
             <div className="flex justify-end gap-3 mt-5">
               <button
                 onClick={() =>
-                  handleStatusChange(selectedRider._id, "rejected")
+                  handleStatusChange(
+                    selectedRider._id,
+                    "rejected",
+                    selectedRider.email
+                  )
                 }
                 className="flex items-center gap-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
               >
                 <XCircle size={18} /> Reject
               </button>
               <button
-                onClick={() => handleStatusChange(selectedRider._id, "active")}
+                onClick={() =>
+                  handleStatusChange(
+                    selectedRider._id,
+                    "active",
+                    selectedRider.email
+                  )
+                }
                 className="flex items-center gap-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
               >
                 <CheckCircle size={18} /> Approve

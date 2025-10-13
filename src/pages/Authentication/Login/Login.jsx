@@ -66,7 +66,11 @@ const Login = () => {
         <p className="mt-1">
           <small>
             Don't have any Account{" "}
-            <Link to={"/register"} className="link link-primary">
+            <Link
+              state={{ from }}
+              to={"/register"}
+              className="link link-primary"
+            >
               Register
             </Link>
           </small>
