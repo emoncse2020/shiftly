@@ -8,9 +8,12 @@ import {
   FiUser,
   FiUsers,
   FiUserPlus,
-  FiUserX,
+  FiUserCheck,
+  FiShield,
+  FiTruck,
 } from "react-icons/fi";
 import useUserRole from "../hooks/useUserRole";
+import { icon } from "leaflet";
 
 const DashboardLayout = () => {
   const { role, isLoading } = useUserRole();
@@ -28,8 +31,22 @@ const DashboardLayout = () => {
     { to: "/dashboard/profile", label: "Update Profile", icon: <FiUser /> },
   ];
 
+  const riderLinks = [
+    {
+      to: "/dashboard/pendingDeliveries",
+      label: "Pending Delivery",
+      icon: <FiTruck></FiTruck>,
+    },
+  ];
+
   // Admin-only links
   const adminLinks = [
+    {
+      to: "/dashboard/assignRider",
+      label: "Assign Rider",
+      icon: <FiUserCheck />, // a better icon for assigning
+    },
+
     {
       to: "/dashboard/activeRiders",
       label: "Active Riders",
@@ -43,12 +60,16 @@ const DashboardLayout = () => {
     {
       to: "/dashboard/makeAdmin",
       label: "Make Admin",
-      icon: <FiUserX />,
+      icon: <FiShield />,
     },
   ];
 
   // Final nav links
-  const navLinks = [...commonLinks, ...(role === "admin" ? adminLinks : [])];
+  const navLinks = [
+    ...commonLinks,
+    ...(role === "admin" ? adminLinks : []),
+    ...(role === "rider" ? riderLinks : []),
+  ];
 
   if (isLoading) {
     return (

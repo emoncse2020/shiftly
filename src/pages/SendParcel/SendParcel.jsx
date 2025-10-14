@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import useAuth from "../../hooks/useAuth";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
@@ -13,6 +13,7 @@ const generateTrackingId = () => {
 };
 
 const SendParcel = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const serviceCenters = useLoaderData();
@@ -29,7 +30,7 @@ const SendParcel = () => {
   const {
     register,
     handleSubmit,
-    reset,
+
     watch,
     setValue,
     formState: { errors },
@@ -170,17 +171,17 @@ const SendParcel = () => {
           if (res.data.insertedId) {
             Swal.fire({
               icon: "success",
-              title: "Booking Confirmed",
-              text: `Tracking ID: ${parcelData.tracking_id}`,
+              title: "Redirecting",
+              timer: 500,
+              text: `Proceeding to payment Gateway. Tracking ID: ${parcelData.tracking_id}`,
               confirmButtonText: "Done",
               confirmButtonColor: "#16a34a",
               width: "320px",
               customClass: {
                 popup: "rounded-xl shadow border border-gray-100",
               },
-            }).then(() => {
-              reset({ parcelType: "Document" });
             });
+            navigate("/dashboard/myParcels");
           }
         });
 

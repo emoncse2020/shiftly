@@ -109,7 +109,7 @@ const ActiveRiders = () => {
                   <td className="flex items-center gap-2">
                     <FiPhone /> {rider.contact}
                   </td>
-                  <td className="hidden md:table-cell flex items-center gap-2">
+                  <td className="hidden md:table-cell items-center gap-2">
                     <FiMapPin /> {rider.region}
                   </td>
                   <td className="hidden md:table-cell">{rider.district}</td>

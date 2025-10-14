@@ -22,7 +22,7 @@ const Register = () => {
   const onSubmit = (data) => {
     // console.log(data);
     createUser(data.email, data.password)
-      .then(async (res) => {
+      .then(async () => {
         // console.log(res.user);
         // update user info at database
         const userInfo = {
