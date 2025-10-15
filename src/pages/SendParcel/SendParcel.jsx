@@ -4,11 +4,12 @@ import { useLoaderData, useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import useAuth from "../../hooks/useAuth";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
+import useTrackingLogger from "../../hooks/useTrackingLogger";
 
 // === Generate Unique Tracking ID ===
 const generateTrackingId = () => {
-  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // 20251007
-  const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase(); // A8D3XQ
+  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
   return `PCL-${datePart}-${randomPart}`;
 };
 
@@ -16,9 +17,9 @@ const SendParcel = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
+  const { logTracking } = useTrackingLogger();
   const serviceCenters = useLoaderData();
 
-  // Extract unique regions
   const uniqueRegions = [...new Set(serviceCenters.map((w) => w.region))];
 
   const [senderDistricts, setSenderDistricts] = useState([]);
@@ -30,20 +31,14 @@ const SendParcel = () => {
   const {
     register,
     handleSubmit,
-
     watch,
     setValue,
     formState: { errors },
-  } = useForm({
-    defaultValues: {
-      parcelType: "Document",
-    },
-  });
+  } = useForm({ defaultValues: { parcelType: "Document" } });
 
   const senderRegion = watch("senderRegion");
   const receiverRegion = watch("receiverRegion");
 
-  // Update sender/receiver districts dynamically
   useEffect(() => {
     if (senderRegion) {
       setSenderDistricts(getDistrictsByRegion(senderRegion));
@@ -58,16 +53,15 @@ const SendParcel = () => {
     }
   }, [receiverRegion, setValue]);
 
-  // === Handle Submit ===
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     const weight = parseFloat(data.parcelWeight);
     const sameCity =
       data.senderRegion === data.receiverRegion &&
       data.senderDistrict === data.receiverDistrict;
 
-    let baseCharge = 0;
-    let extraWeight = 0;
-    let outsideExtra = 0;
+    let baseCharge = 0,
+      extraWeight = 0,
+      outsideExtra = 0;
 
     // === Pricing Logic ===
     if (data.parcelType === "Document") {
@@ -87,29 +81,20 @@ const SendParcel = () => {
     }
 
     const total = baseCharge + extraWeight + outsideExtra;
+    const tracking_id = generateTrackingId();
 
-    // === Final Parcel Data ===
     const parcelData = {
       ...data,
-      tracking_id: generateTrackingId(),
+      tracking_id,
       cost: total,
       created_by: user?.email || "unknown@system.com",
       payment_status: "unpaid",
       delivery_status: "not_collected",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      created_date: new Date().toLocaleDateString("en-GB"), // 07/10/2025
-      created_time: new Date().toLocaleTimeString("en-US", { hour12: true }), // 4:55 PM
-      status_history: [
-        {
-          status: "created",
-          message: "Parcel booked successfully",
-          timestamp: new Date().toISOString(),
-        },
-      ],
+      created_date: new Date().toLocaleDateString("en-GB"),
+      created_time: new Date().toLocaleTimeString("en-US", { hour12: true }),
     };
-
-    // console.log("📦 Parcel Data to Save:", parcelData);
 
     // === SweetAlert Confirmation ===
     Swal.fire({
@@ -145,52 +130,32 @@ const SendParcel = () => {
       cancelButtonText: "✏️ Edit",
       reverseButtons: true,
       width: "360px",
-      background: "#fff",
-      customClass: {
-        popup: "rounded-xl shadow-md border border-gray-100",
-        actions: "flex justify-center gap-3 mt-4",
-        confirmButton:
-          "bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-md transition",
-        cancelButton:
-          "bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-5 py-2 rounded-md transition",
-      },
-      buttonsStyling: false,
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        // 🟢 Save to Backend (example)
-        // fetch("/api/parcels", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify(parcelData),
-        // })
-        // .then(res => res.json())
-        // .then(() => {
-        axiosSecure.post("/parcels", parcelData).then((res) => {
-          // Todl :redirect to the payment page
-          //   console.log(res.data);
-          if (res.data.insertedId) {
-            Swal.fire({
-              icon: "success",
-              title: "Redirecting",
-              timer: 500,
-              text: `Proceeding to payment Gateway. Tracking ID: ${parcelData.tracking_id}`,
-              confirmButtonText: "Done",
-              confirmButtonColor: "#16a34a",
-              width: "320px",
-              customClass: {
-                popup: "rounded-xl shadow border border-gray-100",
-              },
-            });
-            navigate("/dashboard/myParcels");
-          }
-        });
+        // Save parcel
+        const res = await axiosSecure.post("/parcels", parcelData);
+        if (res.data.insertedId) {
+          // Log initial tracking
+          await logTracking({
+            tracking_id,
+            status: "created",
+            details: "Parcel booked successfully",
+            updated_by: user?.email,
+          });
 
-        // });
+          Swal.fire({
+            icon: "success",
+            title: "Booking Confirmed",
+            text: `Parcel tracking ID: ${tracking_id}`,
+            timer: 1200,
+          });
+          navigate("/dashboard/myParcels");
+        }
       }
     });
   };
 
-  // === Reusable Input Components ===
+  // === Input Components ===
   const InputField = ({ label, name, placeholder, type = "text" }) => (
     <div className="form-control w-full">
       <label className="label">
@@ -260,11 +225,10 @@ const SendParcel = () => {
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Add Parcel</h1>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* === Parcel Type === */}
+        {/* Parcel Type */}
         <h2 className="text-xl font-semibold text-gray-700 mb-4">
           Enter your parcel details
         </h2>
-
         <div className="flex space-x-6 mb-6">
           <label className="flex items-center space-x-2 cursor-pointer">
             <input
@@ -296,7 +260,7 @@ const SendParcel = () => {
           <InputField
             label="Parcel Weight (KG)"
             name="parcelWeight"
-            placeholder="Parcel Weight (KG)"
+            placeholder="Parcel Weight"
             type="number"
           />
         </div>
@@ -394,7 +358,7 @@ const SendParcel = () => {
           </div>
         </div>
 
-        {/* === Submit === */}
+        {/* Submit */}
         <div className="mt-8">
           <p className="text-sm text-gray-500 mb-3">
             * Pickup Time: 4pm–7pm (Approx)

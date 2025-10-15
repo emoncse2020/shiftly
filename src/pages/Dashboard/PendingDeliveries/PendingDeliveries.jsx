@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
 
 const PendingDeliveries = () => {
@@ -12,7 +12,7 @@ const PendingDeliveries = () => {
   const [selectedParcel, setSelectedParcel] = useState(null); // Parcel for modal
   const [actionType, setActionType] = useState(""); // "pickup" or "deliver"
 
-  // Fetch rider parcels
+  // ✅ Fetch rider parcels
   const { data: parcels = [], isLoading } = useQuery({
     queryKey: ["riderParcels"],
     enabled: !!user?.email,
@@ -22,22 +22,35 @@ const PendingDeliveries = () => {
     },
   });
 
-  // Mutation to update parcel status
+  // ✅ Mutation to update parcel status & tracking
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ parcelId, status }) => {
-      const res = await axiosSecure.patch(`/parcels/${parcelId}/status`, {
-        status,
+    mutationFn: async ({ parcel, newStatus }) => {
+      // 1️⃣ Update parcel status
+      const res = await axiosSecure.patch(`/parcels/${parcel._id}/status`, {
+        status: newStatus.statusCode,
+        delivery_status: newStatus.deliveryStatus,
       });
-      return res.data;
+
+      // 2️⃣ Log tracking update
+      const trackingRes = await axiosSecure.post("/trackings", {
+        tracking_id: parcel.tracking_id,
+        status: newStatus.statusText, // "Picked Up" or "Delivered"
+        details: newStatus.details,
+        location: parcel.receiverDistrict || parcel.senderDistrict || "N/A",
+        updated_by: user?.email,
+      });
+
+      return { parcelRes: res.data, trackingRes: trackingRes.data };
     },
     onSuccess: () => {
-      toast.success(`✅ Parcel status updated successfully!`);
+      toast.success(`✅ Parcel status updated & tracking logged!`);
       setSelectedParcel(null);
       setActionType("");
       queryClient.invalidateQueries({ queryKey: ["riderParcels"] });
     },
-    onError: () => {
-      toast.error("❌ Failed to update parcel status");
+    onError: (err) => {
+      console.error(err);
+      toast.error("❌ Failed to update parcel or tracking status");
     },
   });
 
@@ -47,6 +60,22 @@ const PendingDeliveries = () => {
         <p className="text-gray-500 text-lg">Loading parcels...</p>
       </div>
     );
+
+  // ✅ Define status mapping
+  const statusMapping = {
+    pickup: {
+      statusText: "Picked Up",
+      statusCode: "in-transit",
+      deliveryStatus: "in-transit",
+      details: "Parcel picked up by rider",
+    },
+    deliver: {
+      statusText: "Delivered",
+      statusCode: "delivered",
+      deliveryStatus: "delivered",
+      details: "Parcel delivered successfully",
+    },
+  };
 
   return (
     <div className="p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
@@ -128,13 +157,13 @@ const PendingDeliveries = () => {
               <p className="text-sm mt-1">
                 Are you sure you want to mark this parcel as{" "}
                 <span className="font-semibold">
-                  {actionType === "pickup" ? "Picked Up" : "Delivered"}
+                  {statusMapping[actionType].statusText}
                 </span>
                 ?
               </p>
             </div>
             <div className="p-5">
-              <div className="mb-4">
+              <div className="mb-4 space-y-1">
                 <p>
                   <strong>Tracking ID:</strong> {selectedParcel.tracking_id}
                 </p>
@@ -147,24 +176,14 @@ const PendingDeliveries = () => {
                 <p>
                   <strong>Receiver:</strong> {selectedParcel.receiverName}
                 </p>
-                <p>
-                  <strong>Pickup Instruction:</strong>{" "}
-                  {selectedParcel.pickupInstruction}
-                </p>
-                <p>
-                  <strong>Delivery Instruction:</strong>{" "}
-                  {selectedParcel.deliveryInstruction}
-                </p>
               </div>
 
               <div className="flex gap-3">
                 <button
                   onClick={() => {
-                    const newStatus =
-                      actionType === "pickup" ? "in-transit" : "delivered";
                     updateStatusMutation.mutate({
-                      parcelId: selectedParcel._id,
-                      status: newStatus,
+                      parcel: selectedParcel,
+                      newStatus: statusMapping[actionType],
                     });
                   }}
                   className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium"
@@ -178,7 +197,7 @@ const PendingDeliveries = () => {
                   }}
                   className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition font-medium"
                 >
-                  Go Back
+                  Cancel
                 </button>
               </div>
             </div>

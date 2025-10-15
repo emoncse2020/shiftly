@@ -22,28 +22,36 @@ const AssignRider = () => {
     },
   });
 
-  // ✅ Mutation: Assign rider + update statuses
+  // ✅ Mutation: Assign rider + update statuses + log tracking
   const assignRiderMutation = useMutation({
-    mutationFn: async ({ parcelId, rider }) => {
-      const res = await axiosSecure.patch(`/parcels/${parcelId}/assignRider`, {
+    mutationFn: async ({ parcel, rider }) => {
+      // 1️⃣ Update parcel delivery status & assign rider
+      await axiosSecure.patch(`/parcels/${parcel._id}/assignRider`, {
         riderId: rider._id,
         riderEmail: rider.email,
-        delivery_status: "rider-assigned",
+        delivery_status: "Out for Delivery",
       });
 
-      // ✅ Update rider status too
+      // 2️⃣ Update rider status
       await axiosSecure.patch(`/riders/${rider._id}/work-status`, {
         work_status: "in-delivery",
       });
 
-      return res.data;
+      // 3️⃣ Log tracking update
+      await axiosSecure.post("/trackings", {
+        tracking_id: parcel.tracking_id,
+        status: "Out for Delivery",
+        details: `Rider ${rider.fullName} assigned for delivery.`,
+        location: rider.district,
+        updated_by: "admin", // or current logged-in user
+      });
     },
     onSuccess: () => {
-      toast.success("✅ Rider assigned and status updated!");
+      toast.success("✅ Rider assigned and tracking updated!");
       setSelectedParcel(null);
       queryClient.invalidateQueries({ queryKey: ["paidNotCollectedParcels"] });
     },
-    onError: () => toast.error("❌ Failed to assign rider or update status"),
+    onError: () => toast.error("❌ Failed to assign rider or update tracking"),
   });
 
   // ✅ Load available riders by district
@@ -124,7 +132,7 @@ const AssignRider = () => {
         </div>
       )}
 
-      {/* 🌙 Elegant Rider Selection Modal */}
+      {/* Rider Selection Modal */}
       {selectedParcel && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 px-4">
           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
@@ -172,7 +180,7 @@ const AssignRider = () => {
                       <button
                         onClick={() =>
                           assignRiderMutation.mutate({
-                            parcelId: selectedParcel._id,
+                            parcel: selectedParcel,
                             rider,
                           })
                         }

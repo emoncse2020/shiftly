@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
 import Swal from "sweetalert2";
+import useTrackingLogger from "../../../hooks/useTrackingLogger";
 
 const PaymentForm = () => {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ const PaymentForm = () => {
   const elements = useElements();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { logTracking } = useTrackingLogger();
   //   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
@@ -96,6 +98,14 @@ const PaymentForm = () => {
         if (paymentRes.data.insertedId) {
           //   setSuccess(true);
           //   console.log("Payment successful!", paymentIntent)
+
+          await logTracking({
+            tracking_id: parcelInfo.tracking_id,
+            status: "paid",
+            details: "Payment completed successfully",
+            location: "Online Payment",
+            updated_by: user.email,
+          });
           Swal.fire({
             title: "Payment Successful!",
             text: "Thank you for your payment. Your parcel will be processed soon.",

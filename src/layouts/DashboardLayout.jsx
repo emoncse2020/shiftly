@@ -11,6 +11,7 @@ import {
   FiUserCheck,
   FiShield,
   FiTruck,
+  FiCheckCircle,
 } from "react-icons/fi";
 import useUserRole from "../hooks/useUserRole";
 import { icon } from "leaflet";
@@ -36,6 +37,11 @@ const DashboardLayout = () => {
       to: "/dashboard/pendingDeliveries",
       label: "Pending Delivery",
       icon: <FiTruck></FiTruck>,
+    },
+    {
+      to: "/dashboard/completedDeliveries",
+      label: "Completed Delivery",
+      icon: <FiCheckCircle></FiCheckCircle>,
     },
   ];
 
